@@ -1,30 +1,43 @@
 import {
   CommandsRegistry,
-  handlerLogin,
   registerCommand,
   runCommand,
 } from "./commands/commands";
-import { setUser, readConfig } from "./config";
-import { argv } from "node:process";
+import {
+  handlerLogin,
+  handlerRegister,
+  handlerReset,
+  handlerUsers,
+} from "./commands/users";
 
-function main() {
-  const registry: CommandsRegistry = {};
-  registerCommand(registry, "login", handlerLogin);
+async function main() {
+  const args = process.argv.slice(2);
 
-  const command = argv.slice(2, 3).toString();
-  const args = argv.slice(3);
-
-  if (!command) {
-    console.error("No command provided.");
+  if (args.length < 1) {
+    console.log("usage: cli <command> [args...]");
     process.exit(1);
   }
 
-  if (args.length === 0) {
-    console.error("No argument provided.");
+  const cmdName = args[0];
+  const cmdArgs = args.slice(1);
+  const commandsRegistry: CommandsRegistry = {};
+
+  registerCommand(commandsRegistry, "login", handlerLogin);
+  registerCommand(commandsRegistry, "register", handlerRegister);
+  registerCommand(commandsRegistry, "reset", handlerReset);
+  registerCommand(commandsRegistry, "users", handlerUsers);
+
+  try {
+    await runCommand(commandsRegistry, cmdName, ...cmdArgs);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(`Error running command ${cmdName}: ${err.message}`);
+    } else {
+      console.error(`Error running command ${cmdName}: ${err}`);
+    }
     process.exit(1);
   }
-
-  runCommand(registry, command, ...args);
+  process.exit(0);
 }
 
 main();
