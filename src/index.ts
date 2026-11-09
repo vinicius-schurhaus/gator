@@ -1,4 +1,4 @@
-import { handlerAgg } from "./commands/aggregate";
+import { handlerAgg, handlerBrowse } from "./commands/aggregate";
 import {
   CommandsRegistry,
   registerCommand,
@@ -55,6 +55,11 @@ async function main() {
     commandsRegistry,
     "unfollow",
     middlewareLoggedIn(handlerUnfollow),
+  );
+  registerCommand(
+    commandsRegistry,
+    "browse",
+    middlewareLoggedIn(handlerBrowse),
   );
 
   try {
