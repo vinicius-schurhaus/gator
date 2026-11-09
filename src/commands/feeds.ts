@@ -1,27 +1,18 @@
-import { getUserByID, getUserByName } from "src/lib/db/queries/users";
+import { getUserByID } from "src/lib/db/queries/users";
 import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
-import { readConfig } from "../config";
 import { Feed, User } from "src/lib/db/schema";
 import { createFeedFollow } from "src/lib/db/queries/feed-follows";
 
-export async function handlerAddFeed(cmdName: string, ...args: string[]) {
+export async function handlerAddFeed(
+  cmdName: string,
+  user: User,
+  ...args: string[]
+): Promise<void> {
   if (args.length !== 2) {
     throw new Error(`usage: ${cmdName} <name> <url>`);
   }
 
   const [name, url] = args;
-
-  const currentUser = readConfig().currentUserName;
-
-  if (!currentUser) {
-    throw new Error("No user is currently logged in!");
-  }
-
-  const user = await getUserByName(currentUser);
-
-  if (!user) {
-    throw new Error("Unknown user!");
-  }
 
   const feed = await createFeed(name, url, user.id);
 
